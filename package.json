@@ -1,0 +1,22 @@
+{
+  "name": "donbosco-school-erp",
+  "version": "1.0.0",
+  "description": "Don Bosco School Management Admin Panel (ERP)",
+  "scripts": {
+    "install-backend": "cd server && npm install",
+    "install-frontend": "cd client && npm install",
+    "install-all": "npm run install-backend && npm run install-frontend",
+    "start-backend": "cd server && npm start",
+    "start-frontend": "cd client && npm run dev",
+    "dev-backend": "cd server && npm run dev"
+  },
+  "keywords": [
+    "school-erp",
+    "school-management",
+    "react",
+    "express",
+    "mongodb"
+  ],
+  "author": "Antigravity",
+  "license": "ISC"
+}
