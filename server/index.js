@@ -38,9 +38,13 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'School Management ERP Server is healthy.' });
 });
 
-// Start Server listening
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`[ERP Server] running in active mode on port ${PORT}`);
-  console.log(`[ERP Server] connected to MongoDB: donbosco-admin`);
-});
+// Start Server listening (only if not running in a serverless environment like Vercel)
+if (process.env.VERCEL !== '1' && !process.env.NOW_REGION) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`[ERP Server] running in active mode on port ${PORT}`);
+    console.log(`[ERP Server] connected to MongoDB: donbosco-admin`);
+  });
+}
+
+module.exports = app;

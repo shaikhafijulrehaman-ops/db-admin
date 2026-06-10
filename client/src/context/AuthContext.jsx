@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
 
   // API Call Helper with automatic Token attachment
   const apiRequest = async (endpoint, options = {}) => {
-    const baseUrl = 'http://localhost:5000/api';
+    const baseUrl = '/api';
     const url = `${baseUrl}${endpoint}`;
 
     const headers = {
@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
