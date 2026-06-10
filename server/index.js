@@ -26,6 +26,34 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'));
 }
 
+// Database connection verification middleware
+app.use(async (req, res, next) => {
+  // Allow health check endpoint without DB connection
+  if (req.path === '/api/health') {
+    return next();
+  }
+
+  try {
+    await connectDB();
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState < 1) {
+      const dbUri = process.env.MONGODB_URI;
+      return res.status(500).json({
+        success: false,
+        message: dbUri 
+          ? "Database connection is not ready. Please check if your MongoDB server is running and accessible."
+          : "Database connection is not ready. MONGODB_URI environment variable is missing in project settings."
+      });
+    }
+    next();
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Database connection failed: " + err.message
+    });
+  }
+});
+
 // Map REST API Endpoints
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);

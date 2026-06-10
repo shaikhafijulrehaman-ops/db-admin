@@ -8,16 +8,38 @@ const Class = require('./models/Class');
 const Student = require('./models/Student');
 const Setting = require('./models/Setting');
 
+let isConnected = false;
+let lastConnectAttempt = 0;
+const CONNECT_COOLDOWN = 10000; // 10 seconds cooldown
+
 const connectDB = async () => {
+  if (isConnected && mongoose.connection.readyState >= 1) {
+    return;
+  }
+  
+  const now = Date.now();
+  if (!isConnected && (now - lastConnectAttempt < CONNECT_COOLDOWN)) {
+    // Under cooldown, skip connection attempt to avoid blocking
+    return;
+  }
+
+  lastConnectAttempt = now;
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
+    if (!process.env.MONGODB_URI) {
+      console.error("Database connection error: MONGODB_URI environment variable is missing.");
+      return;
+    }
+    const conn = await mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000 // fail fast in 5s
+    });
     console.log(`MongoDB Connected: ${conn.connection.host}`);
+    isConnected = true;
     
     // Seed default data if database is empty
     await seedDatabase();
   } catch (error) {
     console.error(`Database connection error: ${error.message}`);
-    process.exit(1);
+    isConnected = false;
   }
 };
 

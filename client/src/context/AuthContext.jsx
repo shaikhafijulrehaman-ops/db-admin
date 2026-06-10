@@ -4,6 +4,23 @@ const AuthContext = createContext(null);
 
 export const useAuth = () => useContext(AuthContext);
 
+const parseJSON = async (response) => {
+  const contentType = response.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    try {
+      return await response.json();
+    } catch (err) {
+      throw new Error('Failed to parse server response. Please try again.');
+    }
+  } else {
+    const text = await response.text();
+    if (text && (text.trim().startsWith('<') || text.includes('<html>'))) {
+      throw new Error('Server returned an unexpected HTML response. Please check database connection and server logs.');
+    }
+    throw new Error(text || `Server error occurred (Status ${response.status})`);
+  }
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('erp_token') || null);
@@ -42,7 +59,7 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const response = await fetch(url, config);
-      const data = await response.json();
+      const data = await parseJSON(response);
       
       // If unauthorized (token expired), log user out
       if (response.status === 401) {
@@ -69,7 +86,7 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ username, password })
       });
       
-      const data = await response.json();
+      const data = await parseJSON(response);
       
       if (!response.ok) {
         throw new Error(data.message || 'Login failed');
